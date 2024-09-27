@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zakkina's WBR QOL
 // @namespace    http://tampermonkey.net/
-// @version      4.9
+// @version      4.91
 // @description  Quality of Life improvements for whatbeatsrock.com
 // @author       Zakkina & a lil bit of ChatGPT 
 // @match        https://www.whatbeatsrock.com/*
@@ -26,6 +26,20 @@
         uiDiv.style.borderRadius = '5px';
         uiDiv.style.zIndex = '9999'; // Ensure it's on top
         uiDiv.style.fontFamily = 'Arial, sans-serif';
+
+        const uiDiv2 = document.createElement('div');
+        uiDiv2.style.position = 'relative'; // 'fixed' for better positioning
+        uiDiv2.style.top = "10px"  // Adjusted to move the menu up
+        uiDiv2.style.right = '5px';
+        uiDiv2.style.padding = '10px';
+        uiDiv2.style.backgroundColor = '#333';  // Default background
+        uiDiv2.style.color = '#fff';
+        uiDiv2.style.borderRadius = '5px';
+        uiDiv2.style.zIndex = '9999'; // Ensure it's on top
+        uiDiv2.style.fontFamily = 'Arial, sans-serif';
+        uiDiv2.innerText = "Zakkina's WhatBeatsRock QOL"
+
+        uiDiv.appendChild(uiDiv2)
 
         // Create the toggle button
         const toggleButton = document.createElement('button');
