@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zakkina's WBR QOL
 // @namespace    http://tampermonkey.net/
-// @version      4.3
-// @description  Quality of Life improvements for whatbeatsrock.com with customizable backgrounds
+// @version      4.5
+// @description  Quality of Life improvements for whatbeatsrock.com
 // @author       Zakkina & ChatGPT
 // @match        https://www.whatbeatsrock.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=whatbeatsrock.com
@@ -98,19 +98,38 @@
             return `rgb(${Math.floor(r * factor)}, ${Math.floor(g * factor)}, ${Math.floor(b * factor)})`;
         }
 
+        // Function to create a lighter version of the RGB color
+        function lightenColor(r, g, b, factor = 1.1) {
+            return `rgb(${Math.min(255, Math.floor(r * factor))}, ${Math.min(255, Math.floor(g * factor))}, ${Math.min(255, Math.floor(b * factor))})`;
+        }
+
+        // Function to ensure the RGB value doesn't go below 30
+        function adjustRgbValue(value) {
+            return Math.max(30, value); // Ensure the value is at least 30
+        }
+
         // Function to update both body and UI background colors
         function updateBackgroundColors() {
-            const r = rgbInputs[0].value;
-            const g = rgbInputs[1].value;
-            const b = rgbInputs[2].value;
+            let r = adjustRgbValue(Number(rgbInputs[0].value));
+            let g = adjustRgbValue(Number(rgbInputs[1].value));
+            let b = adjustRgbValue(Number(rgbInputs[2].value));
 
-            // Set body's background color to the chosen RGB value
+            // Set body's background color to the chosen RGB value (with a minimum of 30 for readability)
             const rgbColor = `rgb(${r},${g},${b})`;
             document.body.style.backgroundColor = rgbColor;
 
-            // Set UI's background color to a darker version of the chosen RGB
+            // Set UI's background color to a darker version of the adjusted RGB
             const darkenedColor = darkenColor(r, g, b, 0.3); // Darken by 70%
             uiDiv.style.backgroundColor = darkenedColor;
+
+            // Get all inputs with class "pl-4 py-4 text-lg border border-1-black"
+            const inputs = document.querySelectorAll('.pl-4.py-4.text-lg.border.border-1-black');
+            
+            // Set the background color of these inputs to a lighter version of the chosen RGB
+            const lightenedColor = lightenColor(r, g, b, 1.1); // Lighten by 10%
+            inputs.forEach(input => {
+                input.style.backgroundColor = lightenedColor;
+            });
         }
 
         // Attach input event listeners to update background in real-time
