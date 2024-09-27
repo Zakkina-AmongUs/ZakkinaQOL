@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zakkina's WBR QOL
 // @namespace    http://tampermonkey.net/
-// @version      2024-09-28
+// @version      4.0
 // @description  Quality of Life improvements for whatbeatsrock.com
 // @author       Zakkina
 // @match        https://www.whatbeatsrock.com/*
