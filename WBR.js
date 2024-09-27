@@ -1,13 +1,11 @@
 // ==UserScript==
 // @name         Zakkina's WBR QOL
 // @namespace    http://tampermonkey.net/
-// @version      4.5
+// @version      4.9
 // @description  Quality of Life improvements for whatbeatsrock.com
-// @author       Zakkina & ChatGPT
+// @author       Zakkina & a lil bit of ChatGPT 
 // @match        https://www.whatbeatsrock.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=whatbeatsrock.com
-// @updateURL    https://github.com/Zakkina-AmongUs/ZakkinaQOL/raw/refs/heads/main/WBR.js
-// @downloadURL  https://github.com/Zakkina-AmongUs/ZakkinaQOL/raw/refs/heads/main/WBR.js
 // @grant        none
 // ==/UserScript==
 
@@ -16,11 +14,11 @@
 
     // Ensure the script runs after the page is fully loaded
     window.addEventListener('load', function() {
-        
+
         // Create the UI container
         const uiDiv = document.createElement('div');
         uiDiv.style.position = 'fixed'; // 'fixed' for better positioning
-        uiDiv.style.bottom = '20px';
+        uiDiv.style.bottom = '60px';  // Adjusted to move the menu up
         uiDiv.style.right = '20px';
         uiDiv.style.padding = '10px';
         uiDiv.style.backgroundColor = '#333';  // Default background
@@ -64,8 +62,66 @@
             return input;
         });
 
-        // Append the UI to the document body
+        // Add lightness sliders for UI and WBR input backgrounds
+        const uiLightnessLabel = document.createElement('p');
+        uiLightnessLabel.textContent = 'UI Background Lightness Factor (0.1 - 0.7):';
+        uiDiv.appendChild(uiLightnessLabel);
+
+        const uiLightnessSlider = document.createElement('input');
+        uiLightnessSlider.type = 'range';
+        uiLightnessSlider.min = '0.1';
+        uiLightnessSlider.max = '0.7';
+        uiLightnessSlider.step = '0.01';
+        uiLightnessSlider.value = '0.5';  // Default value
+        uiDiv.appendChild(uiLightnessSlider);
+
+        const inputLightnessLabel = document.createElement('p');
+        inputLightnessLabel.textContent = 'WBR Input Background Lightness Factor (1.2 - 1.9):';
+        uiDiv.appendChild(inputLightnessLabel);
+
+        const inputLightnessSlider = document.createElement('input');
+        inputLightnessSlider.type = 'range';
+        inputLightnessSlider.min = '1.2';
+        inputLightnessSlider.max = '1.9';
+        inputLightnessSlider.step = '0.01';
+        inputLightnessSlider.value = '1.5';  // Default value
+        uiDiv.appendChild(inputLightnessSlider);
+
+        // Add Hide/Unhide Button
+        const hideButton = document.createElement('button');
+        hideButton.textContent = 'Hide Menu';
+        hideButton.style.backgroundColor = '#1e90ff';
+        hideButton.style.color = '#fff';
+        hideButton.style.border = 'none';
+        hideButton.style.padding = '10px 20px';
+        hideButton.style.cursor = 'pointer';
+        hideButton.style.borderRadius = '5px';
+        hideButton.style.fontSize = '14px';
+        hideButton.style.marginTop = '10px';
+
+        // Add the hide/unhide button outside the uiDiv (so it doesn't hide itself)
+        const hideButtonDiv = document.createElement('div');
+        hideButtonDiv.style.position = 'fixed';
+        hideButtonDiv.style.bottom = '20px'; // Positioned right below the menu
+        hideButtonDiv.style.right = '20px';
+        hideButtonDiv.appendChild(hideButton);
+
+        // Function to hide/unhide the menu
+        let isMenuHidden = false;
+        hideButton.addEventListener('click', function() {
+            isMenuHidden = !isMenuHidden;
+            if (isMenuHidden) {
+                uiDiv.style.display = 'none';
+                hideButton.textContent = 'Show Menu';
+            } else {
+                uiDiv.style.display = 'block';
+                hideButton.textContent = 'Hide Menu';
+            }
+        });
+
+        // Append the UI and the hide button to the document body
         document.body.appendChild(uiDiv);
+        document.body.appendChild(hideButtonDiv);
 
         // Autoclicking status
         let isAutoclickEnabled = false;
@@ -118,15 +174,19 @@
             const rgbColor = `rgb(${r},${g},${b})`;
             document.body.style.backgroundColor = rgbColor;
 
+            // Get lightness factors from sliders
+            const uiLightnessFactor = Number(uiLightnessSlider.value);
+            const inputLightnessFactor = Number(inputLightnessSlider.value);
+
             // Set UI's background color to a darker version of the adjusted RGB
-            const darkenedColor = darkenColor(r, g, b, 0.3); // Darken by 70%
+            const darkenedColor = darkenColor(r, g, b, uiLightnessFactor); // Use UI lightness factor
             uiDiv.style.backgroundColor = darkenedColor;
 
             // Get all inputs with class "pl-4 py-4 text-lg border border-1-black"
             const inputs = document.querySelectorAll('.pl-4.py-4.text-lg.border.border-1-black');
             
             // Set the background color of these inputs to a lighter version of the chosen RGB
-            const lightenedColor = lightenColor(r, g, b, 1.1); // Lighten by 10%
+            const lightenedColor = lightenColor(r, g, b, inputLightnessFactor); // Use input lightness factor
             inputs.forEach(input => {
                 input.style.backgroundColor = lightenedColor;
             });
@@ -136,6 +196,10 @@
         rgbInputs.forEach(input => {
             input.addEventListener('input', updateBackgroundColors);
         });
+
+        // Attach event listeners to lightness sliders to update the background colors
+        uiLightnessSlider.addEventListener('input', updateBackgroundColors);
+        inputLightnessSlider.addEventListener('input', updateBackgroundColors);
 
     });
 
