@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zakkina's WBR QOL
 // @namespace    http://tampermonkey.net/
-// @version      5.0
-// @description  Quality of Life improvements for whatbeatsrock.com, including autoclick, slur filtering, number bypass, and support for custom games.
+// @version      5.2
+// @description  Quality of Life improvements for whatbeatsrock.com, including autoclick, slur filtering, number bypass, RGB sliders.
 // @author       Zakkina & a lil bit of ChatGPT 
 // @match        https://www.whatbeatsrock.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=whatbeatsrock.com
@@ -39,7 +39,7 @@
 
         uiDiv.appendChild(uiDiv2);
 
-        // Create the autoclick toggle button
+        // Autoclick toggle button
         const toggleButton = document.createElement('button');
         toggleButton.textContent = 'Autoclick: OFF';
         toggleButton.style.backgroundColor = '#ff4757';
@@ -53,7 +53,7 @@
 
         uiDiv.appendChild(toggleButton);
 
-        // Create the slur filtering toggle
+        // Slur filter toggle button
         const slurFilterToggle = document.createElement('button');
         slurFilterToggle.textContent = 'Slur Filter: OFF';
         slurFilterToggle.style.backgroundColor = '#ff4757';
@@ -67,7 +67,7 @@
 
         uiDiv.appendChild(slurFilterToggle);
 
-        // Create number detection bypass toggle
+        // Number detection bypass toggle button
         const numberBypassToggle = document.createElement('button');
         numberBypassToggle.textContent = 'Number Bypass: OFF';
         numberBypassToggle.style.backgroundColor = '#ff4757';
@@ -81,21 +81,52 @@
 
         uiDiv.appendChild(numberBypassToggle);
 
-        // Custom game support toggle
-        const customGameToggle = document.createElement('button');
-        customGameToggle.textContent = 'Custom Games: OFF';
-        customGameToggle.style.backgroundColor = '#ff4757';
-        customGameToggle.style.color = '#fff';
-        customGameToggle.style.border = 'none';
-        customGameToggle.style.padding = '10px 20px';
-        customGameToggle.style.cursor = 'pointer';
-        customGameToggle.style.borderRadius = '5px';
-        customGameToggle.style.fontSize = '14px';
-        customGameToggle.style.marginTop = '10px'; 
+        // RGB Selector Label
+        const rgbLabel = document.createElement('p');
+        rgbLabel.textContent = 'Background Color (RGB):';
+        rgbLabel.style.marginTop = '10px';
+        uiDiv.appendChild(rgbLabel);
 
-        uiDiv.appendChild(customGameToggle);
+        // RGB Input Sliders
+        const rgbInputs = ['Red', 'Green', 'Blue'].map((color) => {
+            const label = document.createElement('label');
+            label.textContent = `${color}: `;
+            const input = document.createElement('input');
+            input.type = 'range';
+            input.min = '0';
+            input.max = '255';
+            input.value = '51';  
+            input.style.margin = '5px';
+            label.appendChild(input);
+            uiDiv.appendChild(label);
+            return input;
+        });
 
-        // RGB selector and other sliders can remain unchanged...
+        // UI lightness slider
+        const uiLightnessLabel = document.createElement('p');
+        uiLightnessLabel.textContent = 'UI Background Lightness Factor (0.1 - 0.7):';
+        uiDiv.appendChild(uiLightnessLabel);
+
+        const uiLightnessSlider = document.createElement('input');
+        uiLightnessSlider.type = 'range';
+        uiLightnessSlider.min = '0.1';
+        uiLightnessSlider.max = '0.7';
+        uiLightnessSlider.step = '0.01';
+        uiLightnessSlider.value = '0.5';  
+        uiDiv.appendChild(uiLightnessSlider);
+
+        // Input lightness slider
+        const inputLightnessLabel = document.createElement('p');
+        inputLightnessLabel.textContent = 'WBR Input Background Lightness Factor (1.2 - 1.9):';
+        uiDiv.appendChild(inputLightnessLabel);
+
+        const inputLightnessSlider = document.createElement('input');
+        inputLightnessSlider.type = 'range';
+        inputLightnessSlider.min = '1.2';
+        inputLightnessSlider.max = '1.9';
+        inputLightnessSlider.step = '0.01';
+        inputLightnessSlider.value = '1.5';  
+        uiDiv.appendChild(inputLightnessSlider);
 
         // Hide/Unhide Button
         const hideButton = document.createElement('button');
@@ -129,10 +160,7 @@
         // Number bypass status
         let isNumberBypassEnabled = false;
 
-        // Custom game support status
-        let isCustomGameEnabled = false;
-
-        // Function to click the button if it exists
+        // Click next button logic
         function clickNextButton() {
             const buttons = document.getElementsByClassName("py-4 px-8 border border-1-black text-lg");
             if (buttons.length > 0) {
@@ -154,10 +182,10 @@
             }
         });
 
-        // filtering
-        const bad = ["nigger", "retard", "fuck", "trannie", "cunt", "bitch", "ass", "dick", "nigga", "nigg", "heil hitler"]; // don't take it down tis for ze filters
+        // Slur filtering logic
+        const slurs = ["nigger", "retard", "fuck", "trannie", "cunt", "bitch", "ass", "dick", "nigga", "nigg", "heil hitler"]; 
         function filterSlurs() {
-            slurs.forEach(bad => {
+            slurs.forEach(slur => {
                 const regex = new RegExp(slur, 'gi');
                 document.body.innerHTML = document.body.innerHTML.replace(regex, '****');
             });
@@ -176,59 +204,76 @@
             }
         });
 
-        // Bypass number detection (Convert numbers to words)
+        // Number bypass logic (converting numbers to words)
         const numberToWords = (num) => {
-            // Converts numbers 0-999 to words, expand this logic if needed
             const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
             const teens = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
             const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
-
-            if (num < 10) return ones[num];
-            if (num < 20) return teens[num - 10];
-            if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? "-" + ones[num % 10] : "");
-
-            return ones[Math.floor(num / 100)] + " hundred" + (num % 100 !== 0 ? " and " + numberToWords(num % 100) : "");
+            const convert = (n) => {
+                if (n < 10) return ones[n];
+                else if (n < 20) return teens[n - 10];
+                else if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 === 0 ? '' : ' ' + ones[n % 10]);
+                return n.toString(); 
+            };
+            return convert(parseInt(num));
         };
 
-        function replaceNumbersInInput() {
-            const inputs = document.querySelectorAll('input[type="text"]');
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    this.value = this.value.replace(/\d+/g, (match) => numberToWords(parseInt(match, 10)));
-                });
+        function bypassNumbers() {
+            document.body.innerHTML = document.body.innerHTML.replace(/\b\d+\b/g, function(match) {
+                return numberToWords(match);
             });
         }
 
+        // Toggle number bypass
         numberBypassToggle.addEventListener('click', function() {
             isNumberBypassEnabled = !isNumberBypassEnabled;
             if (isNumberBypassEnabled) {
                 numberBypassToggle.textContent = 'Number Bypass: ON';
                 numberBypassToggle.style.backgroundColor = '#2ed573';
-                replaceNumbersInInput(); 
+                bypassNumbers(); 
             } else {
                 numberBypassToggle.textContent = 'Number Bypass: OFF';
                 numberBypassToggle.style.backgroundColor = '#ff4757';
             }
         });
 
-        // Custom game support
-        customGameToggle.addEventListener('click', function() {
-            isCustomGameEnabled = !isCustomGameEnabled;
-            if (isCustomGameEnabled) {
-                customGameToggle.textContent = 'Custom Games: ON';
-                customGameToggle.style.backgroundColor = '#2ed573';
-                // Match custom game URLs and apply the script functionality
-                if (window.location.href.includes("/user/zakkina/custom")) {
-                    uiDiv2
-                }
+        // RGB background color update
+        function updateBackgroundColor() {
+            const r = rgbInputs[0].value;
+            const g = rgbInputs[1].value;
+            const b = rgbInputs[2].value;
+            document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        }
+
+        rgbInputs.forEach(input => {
+            input.addEventListener('input', updateBackgroundColor);
+        });
+
+        // UI Lightness factor update
+        uiLightnessSlider.addEventListener('input', function() {
+            const lightnessFactor = uiLightnessSlider.value;
+            uiDiv.style.backgroundColor = `rgba(51, 51, 51, ${lightnessFactor})`;
+        });
+
+        // WBR Input background lightness factor update
+        inputLightnessSlider.addEventListener('input', function() {
+            const inputLightnessFactor = inputLightnessSlider.value;
+            const inputs = document.querySelectorAll('input[type=text], textarea');
+            inputs.forEach(input => {
+                input.style.backgroundColor = `rgba(51, 51, 51, ${inputLightnessFactor})`;
+            });
+        });
+
+        // Hide/Unhide menu functionality
+        hideButton.addEventListener('click', function() {
+            if (uiDiv.style.display === 'none') {
+                uiDiv.style.display = 'block';
+                hideButton.textContent = 'Hide Menu';
             } else {
-                customGameToggle.textContent = 'Custom Games: OFF';
-                customGameToggle.style.backgroundColor = '#ff4757';
+                uiDiv.style.display = 'none';
+                hideButton.textContent = 'Unhide Menu';
             }
         });
 
-        // Other UI and functionality remains the same...
-
     });
-
 })();
