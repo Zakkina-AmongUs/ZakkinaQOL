@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zakkina's WBR QOL
 // @namespace    http://tampermonkey.net/
-// @version      5.2
+// @version      5.2.1
 // @description  Quality of Life improvements for whatbeatsrock.com, including autoclick, slur filtering, number bypass, RGB sliders.
 // @author       Zakkina & a lil bit of ChatGPT 
 // @match        https://www.whatbeatsrock.com/*
@@ -204,7 +204,7 @@
             }
         });
 
-        // Number bypass logic (converting numbers to words)
+        // Number bypass logic (converting numbers to words, only for specific elements)
         const numberToWords = (num) => {
             const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
             const teens = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
@@ -219,8 +219,11 @@
         };
 
         function bypassNumbers() {
-            document.body.innerHTML = document.body.innerHTML.replace(/\b\d+\b/g, function(match) {
-                return numberToWords(match);
+            const inputs = document.querySelectorAll('.pl-4.py-4.text-lg.border.border-1-black');
+            inputs.forEach(input => {
+                input.innerHTML = input.innerHTML.replace(/\b\d+\b/g, function(match) {
+                    return numberToWords(match);
+                });
             });
         }
 
