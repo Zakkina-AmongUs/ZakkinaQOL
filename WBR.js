@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zakkina's WBR QOL
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  Quality of Life improvements for whatbeatsrock.com
 // @author       Zakkina
 // @match        https://www.whatbeatsrock.com/*
@@ -19,7 +19,7 @@
         
         // Create the UI container
         const uiDiv = document.createElement('div');
-        uiDiv.style.position = 'fixed'; // Changed to 'fixed' for better positioning
+        uiDiv.style.position = 'fixed'; // 'fixed' for better positioning
         uiDiv.style.bottom = '20px';
         uiDiv.style.right = '20px';
         uiDiv.style.padding = '10px';
@@ -42,6 +42,27 @@
 
         // Add the button to the UI container
         uiDiv.appendChild(toggleButton);
+
+        // RGB Selector Label
+        const rgbLabel = document.createElement('p');
+        rgbLabel.textContent = 'Background Color (RGB):';
+        rgbLabel.style.marginTop = '10px';
+        uiDiv.appendChild(rgbLabel);
+
+        // RGB Input Sliders
+        const rgbInputs = ['Red', 'Green', 'Blue'].map((color, index) => {
+            const label = document.createElement('label');
+            label.textContent = `${color}: `;
+            const input = document.createElement('input');
+            input.type = 'range';
+            input.min = '0';
+            input.max = '255';
+            input.value = '51';  // Default value (51 = low tone)
+            input.style.margin = '5px';
+            label.appendChild(input);
+            uiDiv.appendChild(label);
+            return input;
+        });
 
         // Append the UI to the document body
         document.body.appendChild(uiDiv);
@@ -70,6 +91,20 @@
                 toggleButton.style.backgroundColor = '#ff4757'; // Change color to indicate it's off
                 clearInterval(autoclickInterval); // Stop autoclicking
             }
+        });
+
+        // Function to update the background color
+        function updateBackgroundColor() {
+            const r = rgbInputs[0].value;
+            const g = rgbInputs[1].value;
+            const b = rgbInputs[2].value;
+            const rgbColor = `rgb(${r},${g},${b})`;
+            uiDiv.style.backgroundColor = rgbColor;
+        }
+
+        // Attach input event listeners to update background in real-time
+        rgbInputs.forEach(input => {
+            input.addEventListener('input', updateBackgroundColor);
         });
 
     });
